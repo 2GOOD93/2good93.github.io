@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Меню</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ===================== ШАПКА ЗАВЕДЕНИЯ ===================== -->
+  <header id="place-header" class="hidden">
+    <div class="header-inner">
+      <img id="place-logo" class="logo" alt="Логотип" />
+      <div class="place-text">
+        <h1 id="place-name">Название заведения</h1>
+        <p id="place-sub">Меню</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== ЗАГЛУШКА (нет параметра place) ===================== -->
+  <main id="placeholder" class="placeholder">
+    <div class="placeholder-inner">
+      <div class="brand-logo">📋</div>
+      <h1>QR-Menu</h1>
+      <p>Отсканируйте QR-код на столике,<br>чтобы открыть меню заведения.</p>
+    </div>
+  </main>
+
+  <!-- ===================== ОШИБКА (place не найден в конфиге) ===================== -->
+  <main id="not-found" class="placeholder hidden">
+    <div class="placeholder-inner">
+      <div class="brand-logo">⚠️</div>
+      <h1>Меню не найдено</h1>
+      <p>Проверьте правильность ссылки или QR-кода.</p>
+    </div>
+  </main>
+
+  <!-- ===================== PDF-ПРОСМОТРЩИК ===================== -->
+  <main id="pdf-view" class="pdf-view hidden">
+    <div class="pdf-frame-wrap">
+      <iframe id="pdf-frame" class="pdf-frame" title="PDF меню"></iframe>
+      <!-- Фолбэк, если iframe/PDF не поддерживается -->
+      <div id="pdf-fallback" class="pdf-fallback hidden">
+        <p>Ваш браузер не может показать PDF прямо здесь.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===================== ПЛАВАЮЩАЯ КНОПКА ===================== -->
+  <a id="download-btn" class="download-btn hidden" href="#" target="_blank" rel="noopener">
+    ⬇ Открыть / Скачать PDF
+  </a>
+
+  <footer class="footer">
+    <span>Powered by QR-Menu</span>
+  </footer>
+
+<script>
+  /* =========================================================
+     КОНФИГУРАЦИЯ ЗАВЕДЕНИЙ
+     Чтобы добавить новое заведение — просто добавь новую запись.
+     key            — то, что стоит в URL после ?place=
+     name           — название заведения (показывается в шапке)
+     subtitle       — маленький подзаголовок под названием (необязательно)
+     logo           — путь к логотипу (можно оставить как есть — заглушка)
+     pdf            — путь к PDF-файлу меню в папке /menus/
+  ========================================================= */
+  const PLACES = {
+    "kafe-luna": {
+      name: "Кафе «Luna»",
+      subtitle: "Меню",
+      logo: "assets/logo-placeholder.svg",
+      pdf: "menus/kafe-luna.pdf"
+    },
+    "mario-pizza": {
+      name: "Mario Pizza",
+      subtitle: "Меню",
+      logo: "assets/logo-placeholder.svg",
+      pdf: "menus/mario-pizza.pdf"
+    }
+    // Добавляй новые заведения по этому же образцу:
+    // "novoe-kafe": {
+    //   name: "Новое кафе",
+    //   subtitle: "Меню",
+    //   logo: "assets/logo-placeholder.svg",
+    //   pdf: "menus/novoe-kafe.pdf"
+    // },
+  };
+
+  // ---------------------------------------------------------
+  // Логика отображения
+  // ---------------------------------------------------------
+  const params = new URLSearchParams(window.location.search);
+  const placeKey = params.get("place");
+
+  const elHeader = document.getElementById("place-header");
+  const elName = document.getElementById("place-name");
+  const elSub = document.getElementById("place-sub");
+  const elLogo = document.getElementById("place-logo");
+  const elPlaceholder = document.getElementById("placeholder");
+  const elNotFound = document.getElementById("not-found");
+  const elPdfView = document.getElementById("pdf-view");
+  const elPdfFrame = document.getElementById("pdf-frame");
+  const elPdfFallback = document.getElementById("pdf-fallback");
+  const elDownloadBtn = document.getElementById("download-btn");
+
+  function show(el) { el.classList.remove("hidden"); }
+  function hide(el) { el.classList.add("hidden"); }
+
+  if (!placeKey) {
+    // Параметр place не передан — показываем заглушку сервиса
+    show(elPlaceholder);
+  } else {
+    const place = PLACES[placeKey];
+    if (!place) {
+      // Такого заведения нет в конфиге
+      show(elNotFound);
+    } else {
+      // Заполняем шапку
+      document.title = place.name;
+      elName.textContent = place.name;
+      elSub.textContent = place.subtitle || "Меню";
+      elLogo.src = place.logo;
+      elLogo.onerror = () => { elLogo.style.display = "none"; };
+      show(elHeader);
+
+      // Показываем PDF
+      elPdfFrame.src = place.pdf;
+      show(elPdfView);
+
+      // Кнопка "Открыть / Скачать"
+      elDownloadBtn.href = place.pdf;
+      elDownloadBtn.textContent = "⬇ Открыть / Скачать PDF";
+      show(elDownloadBtn);
+
+      // Если iframe не смог загрузить PDF (например, старый Safari/встроенные webview),
+      // через небольшую задержку показываем понятную подсказку.
+      let loaded = false;
+      elPdfFrame.addEventListener("load", () => { loaded = true; });
+      setTimeout(() => {
+        if (!loaded) {
+          show(elPdfFallback);
+        }
+      }, 2500);
+    }
+  }
+</script>
+</body>
+</html>

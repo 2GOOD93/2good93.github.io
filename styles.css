@@ -1,0 +1,186 @@
+/* =========================================================
+   БАЗА
+========================================================= */
+:root {
+  --bg: #121212;
+  --bg-elevated: #1b1b1e;
+  --border: #2a2a2e;
+  --text: #f2f2f2;
+  --text-muted: #9a9a9f;
+  --accent: #e8b64a;
+  --accent-text: #1a1a1a;
+  --radius: 14px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+.hidden { display: none !important; }
+
+/* =========================================================
+   ШАПКА ЗАВЕДЕНИЯ
+========================================================= */
+header#place-header {
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 16px;
+  position: sticky;
+  top: var(--safe-top);
+  z-index: 10;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #2a2a2e;
+  flex-shrink: 0;
+}
+
+.place-text h1 {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.place-text p {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 2px 0 0;
+}
+
+/* =========================================================
+   ЗАГЛУШКА / ОШИБКА
+========================================================= */
+.placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  text-align: center;
+}
+
+.placeholder-inner { max-width: 320px; }
+
+.brand-logo {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.placeholder h1 {
+  font-size: 22px;
+  margin: 0 0 10px;
+}
+
+.placeholder p {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* =========================================================
+   PDF-ПРОСМОТРЩИК
+========================================================= */
+.pdf-view {
+  flex: 1;
+  display: flex;
+  padding: 0;
+}
+
+.pdf-frame-wrap {
+  flex: 1;
+  position: relative;
+  width: 100%;
+}
+
+.pdf-frame {
+  width: 100%;
+  height: 100%;
+  min-height: calc(100dvh - 74px - var(--safe-top) - var(--safe-bottom));
+  border: none;
+  display: block;
+  background: #2a2a2a;
+}
+
+.pdf-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* =========================================================
+   ПЛАВАЮЩАЯ КНОПКА "СКАЧАТЬ"
+========================================================= */
+.download-btn {
+  position: fixed;
+  left: 50%;
+  bottom: calc(18px + var(--safe-bottom));
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  padding: 12px 20px;
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  z-index: 20;
+  white-space: nowrap;
+}
+
+.download-btn:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
+/* =========================================================
+   ФУТЕР
+========================================================= */
+.footer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 6px 0 4px;
+  opacity: 0.6;
+}
+
+/* Скрываем футер, когда открыт полноэкранный PDF, чтобы не красть место */
+.pdf-view ~ .footer {
+  display: none;
+}
