@@ -1,150 +1,80 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Меню</title>
-<link rel="icon" href="data:,">
+<title>Menu</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-  <!-- ===================== ШАПКА ЗАВЕДЕНИЯ ===================== -->
+  <!-- Header shown only when a valid place is loaded -->
   <header id="place-header" class="hidden">
-    <div class="header-inner">
-      <img id="place-logo" class="logo" alt="Логотип" />
-      <div class="place-text">
-        <h1 id="place-name">Название заведения</h1>
-        <p id="place-sub">Меню</p>
-      </div>
-    </div>
+    <img id="place-logo" class="logo" alt="" />
+    <h1 id="place-name">Restaurant</h1>
   </header>
 
-  <!-- ===================== ЗАГЛУШКА (нет параметра place) ===================== -->
-  <main id="placeholder" class="placeholder">
-    <div class="placeholder-inner">
-      <div class="brand-logo">📋</div>
-      <h1>QR-Menu</h1>
-      <p>Отсканируйте QR-код на столике,<br>чтобы открыть меню заведения.</p>
-    </div>
+  <!-- No ?place= param -->
+  <main id="placeholder" class="state">
+    <h1>QR-Menu</h1>
+    <p>Scan the QR code on your table to view the menu.</p>
   </main>
 
-  <!-- ===================== ОШИБКА (place не найден в конфиге) ===================== -->
-  <main id="not-found" class="placeholder hidden">
-    <div class="placeholder-inner">
-      <div class="brand-logo">⚠️</div>
-      <h1>Меню не найдено</h1>
-      <p>Проверьте правильность ссылки или QR-кода.</p>
-    </div>
+  <!-- ?place= param not found in config -->
+  <main id="not-found" class="state hidden">
+    <h1>Menu not found</h1>
+    <p>Please check the link or QR code.</p>
   </main>
 
-  <!-- ===================== PDF-ПРОСМОТРЩИК ===================== -->
-  <main id="pdf-view" class="pdf-view hidden">
-    <div class="pdf-frame-wrap">
-      <iframe id="pdf-frame" class="pdf-frame" title="PDF меню"></iframe>
-      <!-- Фолбэк, если iframe/PDF не поддерживается -->
-      <div id="pdf-fallback" class="pdf-fallback hidden">
-        <p>Ваш браузер не может показать PDF прямо здесь.</p>
-      </div>
-    </div>
+  <!-- PDF viewer -->
+  <main id="pdf-view" class="hidden">
+    <iframe id="pdf-frame" title="PDF menu"></iframe>
+    <p id="pdf-fallback" class="state hidden">Your browser can't preview the PDF here — use the button below.</p>
   </main>
 
-  <!-- ===================== ПЛАВАЮЩАЯ КНОПКА ===================== -->
-  <a id="download-btn" class="download-btn hidden" href="#" target="_blank" rel="noopener">
-    ⬇ Открыть / Скачать PDF
-  </a>
-
-  <footer class="footer">
-    <span>Powered by QR-Menu</span>
-  </footer>
+  <a id="download-btn" class="download-btn hidden" href="#" target="_blank" rel="noopener">Open / Download PDF</a>
 
 <script>
-  /* =========================================================
-     КОНФИГУРАЦИЯ ЗАВЕДЕНИЙ
-     Чтобы добавить новое заведение — просто добавь новую запись.
-     key            — то, что стоит в URL после ?place=
-     name           — название заведения (показывается в шапке)
-     subtitle       — маленький подзаголовок под названием (необязательно)
-     logo           — путь к логотипу (можно оставить как есть — заглушка)
-     pdf            — путь к PDF-файлу меню в папке /menus/
-  ========================================================= */
+  /* ---------------------------------------------------------
+     CONFIG — add a new place here, one line each.
+     key: URL-safe id used as ?place=key
+     name: shown in header
+     logo: path to logo image
+     pdf: path to PDF in /menus/
+  --------------------------------------------------------- */
   const PLACES = {
-    "kafe-luna": {
-      name: "Кафе «Luna»",
-      subtitle: "Меню",
-      logo: "assets/logo-placeholder.svg",
-      pdf: "menus/kafe-luna.pdf"
-    },
-    "mario-pizza": {
-      name: "Mario Pizza",
-      subtitle: "Меню",
-      logo: "assets/logo-placeholder.svg",
-      pdf: "menus/mario-pizza.pdf"
-    }
-    // Добавляй новые заведения по этому же образцу:
-    // "novoe-kafe": {
-    //   name: "Новое кафе",
-    //   subtitle: "Меню",
-    //   logo: "assets/logo-placeholder.svg",
-    //   pdf: "menus/novoe-kafe.pdf"
-    // },
+    "kafe-luna": { name: "Cafe Luna", logo: "assets/logo-placeholder.svg", pdf: "menus/kafe-luna.pdf" },
+    "mario-pizza": { name: "Mario Pizza", logo: "assets/logo-placeholder.svg", pdf: "menus/mario-pizza.pdf" }
+    // "new-place": { name: "New Place", logo: "assets/logo-placeholder.svg", pdf: "menus/new-place.pdf" },
   };
 
-  // ---------------------------------------------------------
-  // Логика отображения
-  // ---------------------------------------------------------
-  const params = new URLSearchParams(window.location.search);
-  const placeKey = params.get("place");
+  const key = new URLSearchParams(location.search).get("place");
+  const $ = id => document.getElementById(id);
+  const show = el => el.classList.remove("hidden");
 
-  const elHeader = document.getElementById("place-header");
-  const elName = document.getElementById("place-name");
-  const elSub = document.getElementById("place-sub");
-  const elLogo = document.getElementById("place-logo");
-  const elPlaceholder = document.getElementById("placeholder");
-  const elNotFound = document.getElementById("not-found");
-  const elPdfView = document.getElementById("pdf-view");
-  const elPdfFrame = document.getElementById("pdf-frame");
-  const elPdfFallback = document.getElementById("pdf-fallback");
-  const elDownloadBtn = document.getElementById("download-btn");
-
-  function show(el) { el.classList.remove("hidden"); }
-  function hide(el) { el.classList.add("hidden"); }
-
-  if (!placeKey) {
-    // Параметр place не передан — показываем заглушку сервиса
-    show(elPlaceholder);
+  if (!key) {
+    show($("placeholder"));
   } else {
-    const place = PLACES[placeKey];
+    const place = PLACES[key];
     if (!place) {
-      // Такого заведения нет в конфиге
-      show(elNotFound);
+      show($("not-found"));
     } else {
-      // Заполняем шапку
       document.title = place.name;
-      elName.textContent = place.name;
-      elSub.textContent = place.subtitle || "Меню";
-      elLogo.src = place.logo;
-      elLogo.onerror = () => { elLogo.style.display = "none"; };
-      show(elHeader);
+      $("place-name").textContent = place.name;
+      $("place-logo").src = place.logo;
+      $("place-logo").onerror = () => { $("place-logo").style.display = "none"; };
+      show($("place-header"));
 
-      // Показываем PDF
-      elPdfFrame.src = place.pdf;
-      show(elPdfView);
+      $("pdf-frame").src = place.pdf;
+      show($("pdf-view"));
 
-      // Кнопка "Открыть / Скачать"
-      elDownloadBtn.href = place.pdf;
-      elDownloadBtn.textContent = "⬇ Открыть / Скачать PDF";
-      show(elDownloadBtn);
+      const btn = $("download-btn");
+      btn.href = place.pdf;
+      show(btn);
 
-      // Если iframe не смог загрузить PDF (например, старый Safari/встроенные webview),
-      // через небольшую задержку показываем понятную подсказку.
       let loaded = false;
-      elPdfFrame.addEventListener("load", () => { loaded = true; });
-      setTimeout(() => {
-        if (!loaded) {
-          show(elPdfFallback);
-        }
-      }, 2500);
+      $("pdf-frame").addEventListener("load", () => { loaded = true; });
+      setTimeout(() => { if (!loaded) show($("pdf-fallback")); }, 2500);
     }
   }
 </script>
