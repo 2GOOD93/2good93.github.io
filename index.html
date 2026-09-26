@@ -42,7 +42,7 @@
      logo: path to logo image
      pdf: path to PDF in /menus/
   --------------------------------------------------------- */
-  const PLACES = {
+  const menu = {
     "kafe-luna": { name: "Cafe Luna", logo: "assets/logo-placeholder.svg", pdf: "menus/kafe-luna.pdf" },
     "mario-pizza": { name: "Mario Pizza", logo: "assets/logo-placeholder.svg", pdf: "menus/mario-pizza.pdf" }
     // "new-place": { name: "New Place", logo: "assets/logo-placeholder.svg", pdf: "menus/new-place.pdf" },
@@ -55,7 +55,7 @@
   if (!key) {
     show($("placeholder"));
   } else {
-    const place = PLACES[key];
+    const place = menu[key];
     if (!place) {
       show($("not-found"));
     } else {
